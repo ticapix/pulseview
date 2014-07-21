@@ -164,6 +164,8 @@ private:
 		const std::shared_ptr<pv::view::Trace> &a,
 		const std::shared_ptr<pv::view::Trace> &b);
 
+	bool find_edge_selection(QPoint pos, int direction, float* edge);
+
 private:
 	bool eventFilter(QObject *object, QEvent *event);
 
@@ -185,6 +187,7 @@ private slots:
 
 	void on_geometry_updated();
 
+	void traces_selected();
 private:
 	SigSession &_session;
 

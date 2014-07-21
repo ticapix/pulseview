@@ -38,7 +38,8 @@ namespace view {
 
 Viewport::Viewport(View &parent) :
 	QWidget(&parent),
-        _view(parent)
+        _view(parent),
+        _on_selection(FALSE)
 {
 	setMouseTracking(true);
 	setAutoFillBackground(true);
@@ -53,6 +54,16 @@ Viewport::Viewport(View &parent) :
 	// Trigger the initial event manually. The default device has signals
 	// which were created before this object came into being
 	on_signals_changed();
+}
+
+QPoint Viewport::get_selection_from() const
+{
+	return _selected_area.from;
+}
+
+QPoint Viewport::get_selection_to() const
+{
+	return _selected_area.to;
 }
 
 int Viewport::get_total_height() const
@@ -93,6 +104,9 @@ void Viewport::paintEvent(QPaintEvent*)
 	if (_view.cursors_shown())
 		_view.cursors().draw_viewport_foreground(p, rect());
 
+	if (_on_selection) {
+		p.fillRect(QRect(_selected_area.from, _selected_area.to).normalized(), QColor(0, 183, 235, 100));
+	}
 	p.end();
 }
 
@@ -102,6 +116,30 @@ void Viewport::mousePressEvent(QMouseEvent *event)
 
 	_mouse_down_point = event->pos();
 	_mouse_down_offset = _view.offset();
+	if (event->buttons() & Qt::RightButton) {
+		_on_selection = TRUE;
+		_selected_area.from = event->pos();
+	}
+}
+
+void Viewport::mouseReleaseEvent(QMouseEvent *event)
+{
+	assert(event);
+
+	_mouse_down_point = event->pos();
+	_mouse_down_offset = _view.offset();
+	if (_on_selection) {
+		_on_selection = FALSE;
+		// normalize that 'from' is on the left side of the selection
+		// and 'to' on the right side
+		if (_selected_area.from.x() <= event->pos().x()) {
+			_selected_area.to = event->pos();
+		} else {
+			_selected_area.to = _selected_area.from;
+			_selected_area.from = event->pos();
+		}
+		traces_selected();
+	}
 }
 
 void Viewport::mouseMoveEvent(QMouseEvent *event)
@@ -114,6 +152,10 @@ void Viewport::mouseMoveEvent(QMouseEvent *event)
 			_mouse_down_offset +
 			(_mouse_down_point - event->pos()).x() *
 			_view.scale());
+	}
+	if (_on_selection) {
+		_selected_area.to = event->pos();
+		update();
 	}
 }
 

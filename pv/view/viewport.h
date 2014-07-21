@@ -41,12 +41,15 @@ public:
 	explicit Viewport(View &parent);
 
 	int get_total_height() const;
+	QPoint get_selection_from() const;
+	QPoint get_selection_to() const;
 
 protected:
 	void paintEvent(QPaintEvent *event);
 
 private:
 	void mousePressEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent * event);
 	void wheelEvent(QWheelEvent *event);
@@ -55,11 +58,20 @@ private slots:
 	void on_signals_changed();
 	void on_signals_moved();
 
+signals:
+	void traces_selected();
+
 private:
 	View &_view;
 
 	QPoint _mouse_down_point;
 	double _mouse_down_offset;
+	bool _on_selection;
+	struct {
+		QPoint from;
+		QPoint to;
+	} _selected_area;
+
 };
 
 } // namespace view

@@ -41,7 +41,9 @@
 #include "pv/sigsession.h"
 #include "pv/data/logic.h"
 #include "pv/data/logicsnapshot.h"
+#include "pv/view/logicsignal.h"
 
+using boost::dynamic_pointer_cast;
 using pv::data::SignalData;
 using std::deque;
 using std::list;
@@ -106,6 +108,9 @@ View::View(SigSession &session, QWidget *parent) :
 		this, SLOT(on_geometry_updated()));
 	connect(_header, SIGNAL(signals_moved()),
 		this, SLOT(on_signals_moved()));
+
+	connect(_viewport, SIGNAL(traces_selected()),
+			this, SLOT(traces_selected()));
 
 	connect(_header, SIGNAL(selection_changed()),
 		_cursorheader, SLOT(clear_selection()));
@@ -545,6 +550,99 @@ void View::on_signals_moved()
 void View::on_geometry_updated()
 {
 	update_layout();
+}
+
+bool View::find_edge_selection(QPoint pos, int direction, float* edge)
+{
+	const vector< shared_ptr<Trace> > traces(get_traces());
+
+	int prev_y = 0;
+	for(const shared_ptr<Trace> t: traces) {
+		assert(t);
+		shared_ptr<view::LogicSignal> sig = dynamic_pointer_cast<view::LogicSignal>(t);
+		if (sig == 0)
+			continue;
+		if (!sig->probe()->enabled)
+			continue;
+		if (!(prev_y <= pos.y() && pos.y() < sig->get_y())) {
+			prev_y = sig->get_y();
+			continue;
+		}
+		prev_y = sig->get_y();
+
+		const deque< shared_ptr<pv::data::LogicSnapshot> > &snapshots =	sig->logic_data()->get_snapshots();
+		if (snapshots.empty())
+			continue;
+
+		const shared_ptr<pv::data::LogicSnapshot> &snapshot = snapshots.front();
+
+		double samplerate = sig->logic_data()->samplerate();
+
+		// Show sample rate as 1Hz when it is unknown
+		if (samplerate == 0.0)
+			samplerate = 1.0;
+
+		int left = 0;
+		int right = _viewport->width();
+
+		assert(right >= left);
+
+		const double pixels_offset = offset() / scale(); // pixel = second / (second/pixel)
+		const double start_time = sig->logic_data()->get_start_time(); // second
+		const int64_t last_sample = snapshot->get_sample_count() - 1; // sample
+		const double samples_per_pixel = samplerate * scale(); // sample/pixel = sample/second * second/pixel
+		const double start = samplerate * (offset() - start_time); // sample = sample/second * second
+		const double end = start + samples_per_pixel * (right - left); // sample
+
+		vector<pv::data::LogicSnapshot::EdgePair> edges;
+		int index = sig->probe()->index;
+		const float Oversampling = 2.0f;
+
+		snapshot->get_subsampled_edges(edges,
+			min(max((int64_t)floor(start), (int64_t)0), last_sample),
+			min(max((int64_t)ceil(end), (int64_t)0), last_sample),
+			samples_per_pixel / Oversampling, index);
+
+		if (edges.size() < 2)
+			continue;
+
+		if (direction > 0) {
+			for (vector<pv::data::LogicSnapshot::EdgePair>::const_iterator i =
+					edges.begin(); i != edges.end(); ++i) {
+				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
+				if (x < pos.x())
+					continue;
+				*edge = x;
+				return TRUE;
+			}
+		} else {
+			for (vector<pv::data::LogicSnapshot::EdgePair>::const_reverse_iterator i =
+					edges.rbegin(); i != edges.rend(); ++i) {
+				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
+				if (x > pos.x())
+					continue;
+				*edge = x;
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+void View::traces_selected()
+{
+	float edge; // in pixel
+	if (find_edge_selection(_viewport->get_selection_from(), -1 /* to the left */, &edge)) {
+		_cursors.first()->set_time(edge * scale() + offset());
+	} else {
+		_cursors.first()->set_time(offset());
+	}
+	if (find_edge_selection(_viewport->get_selection_to(), +1 /* to the right */, &edge)) {
+		_cursors.second()->set_time(edge * scale() + offset());
+	} else {
+		_cursors.second()->set_time(_viewport->width() * scale() + offset());
+	}
+	_viewport->update();
 }
 
 } // namespace view
