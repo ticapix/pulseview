@@ -555,7 +555,7 @@ void View::on_geometry_updated()
 	update_layout();
 }
 
-bool View::find_edge_selection(QPoint pos, int direction, float* edge)
+bool View::find_edge_selection(QPoint pos, enum direction direction, float* edge)
 {
 	const vector< shared_ptr<Trace> > traces(get_traces());
 
@@ -609,7 +609,7 @@ bool View::find_edge_selection(QPoint pos, int direction, float* edge)
 		if (edges.size() < 2)
 			continue;
 
-		if (direction > 0) {
+		if (direction == direction::RIGHT) {
 			for (vector<pv::data::LogicSnapshot::EdgePair>::const_iterator i =
 					edges.begin(); i != edges.end(); ++i) {
 				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
@@ -635,12 +635,12 @@ bool View::find_edge_selection(QPoint pos, int direction, float* edge)
 void View::traces_selected()
 {
 	float edge; // in pixel
-	if (find_edge_selection(_viewport->get_selection_from(), -1 /* to the left */, &edge)) {
+	if (find_edge_selection(_viewport->get_selection_from(), direction::LEFT, &edge)) {
 		_cursors.first()->set_time(edge * scale() + offset());
 	} else {
 		_cursors.first()->set_time(offset());
 	}
-	if (find_edge_selection(_viewport->get_selection_to(), +1 /* to the right */, &edge)) {
+	if (find_edge_selection(_viewport->get_selection_to(), direction::RIGHT, &edge)) {
 		_cursors.second()->set_time(edge * scale() + offset());
 	} else {
 		_cursors.second()->set_time(_viewport->width() * scale() + offset());

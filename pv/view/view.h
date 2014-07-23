@@ -164,7 +164,8 @@ private:
 		const std::shared_ptr<pv::view::Trace> &a,
 		const std::shared_ptr<pv::view::Trace> &b);
 
-	bool find_edge_selection(QPoint pos, int direction, float* edge);
+	enum direction {LEFT, RIGHT};
+	bool find_edge_selection(QPoint pos, enum direction direction, float* edge);
 
 private:
 	bool eventFilter(QObject *object, QEvent *event);
