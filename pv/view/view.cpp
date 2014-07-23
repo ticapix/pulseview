@@ -43,7 +43,7 @@
 #include "pv/data/logicsnapshot.h"
 #include "pv/view/logicsignal.h"
 
-using boost::dynamic_pointer_cast;
+using std::dynamic_pointer_cast;
 using pv::data::SignalData;
 using std::deque;
 using std::list;
