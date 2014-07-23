@@ -552,7 +552,7 @@ void View::on_geometry_updated()
 	update_layout();
 }
 
-bool View::find_edge_selection(QPoint pos, enum direction direction, float* edge)
+boost::optional<float> View::find_edge_selection(QPoint pos, enum direction way)
 {
 	const vector< shared_ptr<Trace> > traces(get_traces());
 
@@ -606,14 +606,13 @@ bool View::find_edge_selection(QPoint pos, enum direction direction, float* edge
 		if (edges.size() < 2)
 			continue;
 
-		if (direction == direction::RIGHT) {
+		if (way == direction::RIGHT) {
 			for (vector<pv::data::LogicSnapshot::EdgePair>::const_iterator i =
 					edges.begin(); i != edges.end(); ++i) {
 				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
 				if (x < pos.x())
 					continue;
-				*edge = x;
-				return true;
+				return boost::optional<float>(x);
 			}
 		} else {
 			for (vector<pv::data::LogicSnapshot::EdgePair>::const_reverse_iterator i =
@@ -621,24 +620,23 @@ bool View::find_edge_selection(QPoint pos, enum direction direction, float* edge
 				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
 				if (x > pos.x())
 					continue;
-				*edge = x;
-				return true;
+				return boost::optional<float>(x);
 			}
 		}
 	}
-	return false;
+	return boost::optional<float>(boost::none);
 }
 
 void View::traces_selected()
 {
-	float edge; // in pixel
-	if (find_edge_selection(_viewport->get_selection_from(), direction::LEFT, &edge)) {
-		_cursors.first()->set_time(edge * scale() + offset());
+	boost::optional<float> edge; // in pixel
+	if ((edge = find_edge_selection(_viewport->get_selection_from(), direction::LEFT))) {
+		_cursors.first()->set_time(*edge * scale() + offset());
 	} else {
 		_cursors.first()->set_time(offset());
 	}
-	if (find_edge_selection(_viewport->get_selection_to(), direction::RIGHT, &edge)) {
-		_cursors.second()->set_time(edge * scale() + offset());
+	if ((edge = find_edge_selection(_viewport->get_selection_to(), direction::RIGHT))) {
+		_cursors.second()->set_time(*edge * scale() + offset());
 	} else {
 		_cursors.second()->set_time(_viewport->width() * scale() + offset());
 	}

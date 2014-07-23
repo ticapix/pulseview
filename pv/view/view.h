@@ -27,12 +27,17 @@
 #include <set>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <QAbstractScrollArea>
 #include <QSizeF>
 
 #include <pv/data/signaldata.h>
 
 #include "cursorpair.h"
+
+
+using boost::optional;
 
 namespace pv {
 
@@ -165,7 +170,7 @@ private:
 		const std::shared_ptr<pv::view::Trace> &b);
 
 	enum direction {LEFT, RIGHT};
-	bool find_edge_selection(QPoint pos, enum direction direction, float* edge);
+	boost::optional<float> find_edge_selection(QPoint pos, enum direction way);
 
 private:
 	bool eventFilter(QObject *object, QEvent *event);
