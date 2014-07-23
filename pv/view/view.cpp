@@ -613,7 +613,7 @@ bool View::find_edge_selection(QPoint pos, enum direction direction, float* edge
 				if (x < pos.x())
 					continue;
 				*edge = x;
-				return TRUE;
+				return true;
 			}
 		} else {
 			for (vector<pv::data::LogicSnapshot::EdgePair>::const_reverse_iterator i =
@@ -622,11 +622,11 @@ bool View::find_edge_selection(QPoint pos, enum direction direction, float* edge
 				if (x > pos.x())
 					continue;
 				*edge = x;
-				return TRUE;
+				return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 void View::traces_selected()
