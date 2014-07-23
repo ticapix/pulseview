@@ -71,7 +71,7 @@ private:
 		QPoint from;
 		QPoint to;
 	} _selected_area;
-
+	QColor _selection_color;
 };
 
 } // namespace view

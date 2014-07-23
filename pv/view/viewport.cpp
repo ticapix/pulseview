@@ -27,6 +27,7 @@
 #include "../sigsession.h"
 
 #include <QMouseEvent>
+#include <QApplication>
 
 using std::max;
 using std::min;
@@ -44,6 +45,8 @@ Viewport::Viewport(View &parent) :
 	setMouseTracking(true);
 	setAutoFillBackground(true);
 	setBackgroundRole(QPalette::Base);
+	_selection_color = QApplication::palette().highlight().color();
+	_selection_color.setAlphaF(0.5);
 
 	connect(&_view.session(), SIGNAL(signals_changed()),
 		this, SLOT(on_signals_changed()));
@@ -105,7 +108,8 @@ void Viewport::paintEvent(QPaintEvent*)
 		_view.cursors().draw_viewport_foreground(p, rect());
 
 	if (_on_selection) {
-		p.fillRect(QRect(_selected_area.from, _selected_area.to).normalized(), QColor(0, 183, 235, 100));
+		p.fillRect(QRect(_selected_area.from, _selected_area.to).normalized(),
+				_selection_color);
 	}
 	p.end();
 }
