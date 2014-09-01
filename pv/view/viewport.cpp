@@ -40,7 +40,7 @@ namespace view {
 Viewport::Viewport(View &parent) :
 	QWidget(&parent),
         _view(parent),
-        _on_selection(FALSE)
+        _on_selection(false)
 {
 	setMouseTracking(true);
 	setAutoFillBackground(true);
