@@ -205,6 +205,10 @@ void Viewport::mouseMoveEvent(QMouseEvent *event)
 		_selected_area.to = event->pos();
 		update();
 	}
+	if (_on_selection) {
+		_selected_area.to = event->pos();
+		update();
+	}
 }
 
 void Viewport::mouseDoubleClickEvent(QMouseEvent *event)

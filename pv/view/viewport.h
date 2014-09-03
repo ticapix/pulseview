@@ -64,6 +64,9 @@ private Q_SLOTS:
 signals:
 	void traces_selected();
 
+signals:
+	void traces_selected();
+
 private:
 	View &_view;
 
