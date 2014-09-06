@@ -163,11 +163,6 @@ void Viewport::mouseReleaseEvent(QMouseEvent *event)
 		_on_selection = true;
 		_selected_area.from = event->pos();
 	}
-}
-
-void Viewport::mouseReleaseEvent(QMouseEvent *event)
-{
-	assert(event);
 
 	_mouse_down_point = event->pos();
 	_mouse_down_offset = _view.offset();

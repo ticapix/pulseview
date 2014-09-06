@@ -61,10 +61,7 @@ private Q_SLOTS:
 	void on_signals_changed();
 	void on_signals_moved();
 
-signals:
-	void traces_selected();
-
-signals:
+Q_SIGNALS:
 	void traces_selected();
 
 private:

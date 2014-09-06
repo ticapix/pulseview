@@ -565,7 +565,7 @@ boost::optional<float> View::find_edge_selection(QPoint pos, enum direction way)
 		shared_ptr<view::LogicSignal> sig = dynamic_pointer_cast<view::LogicSignal>(t);
 		if (sig == 0)
 			continue;
-		if (!sig->probe()->enabled)
+		if (!sig->channel()->enabled)
 			continue;
 		if (!(prev_y <= pos.y() && pos.y() < sig->get_y())) {
 			prev_y = sig->get_y();
@@ -598,7 +598,7 @@ boost::optional<float> View::find_edge_selection(QPoint pos, enum direction way)
 		const double end = start + samples_per_pixel * (right - left); // sample
 
 		vector<pv::data::LogicSnapshot::EdgePair> edges;
-		int index = sig->probe()->index;
+		int index = sig->channel()->index;
 		const float Oversampling = 2.0f;
 
 		snapshot->get_subsampled_edges(edges,
