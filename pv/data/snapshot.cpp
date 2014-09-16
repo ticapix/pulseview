@@ -84,6 +84,7 @@ void Snapshot::append_data(void *data, uint64_t samples)
 		set_capacity(_sample_count + samples);
 	}
 
+	assert(_sample_count > samples); // otherwise use memmove instead of memcpy
 	memcpy((uint8_t*)_data.data() + _sample_count * _unit_size,
 		data, samples * _unit_size);
 	_sample_count += samples;
