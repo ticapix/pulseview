@@ -1,7 +1,7 @@
 /*
  * This file is part of the PulseView project.
  *
- * Copyright (C) 2014 Joel Holdsworth <joel@airwebreathe.org.uk>
+ * Copyright (C) 2014 Martin Ling <martin-sigrok@earth.li>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,37 +18,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef PULSEVIEW_PV_DEVICE_DEVICE_H
-#define PULSEVIEW_PV_DEVICE_DEVICE_H
+#ifndef PULSEVIEW_PV_APPLICATION_H
+#define PULSEVIEW_PV_APPLICATION_H
 
-#include <map>
-#include <string>
+#include <QApplication>
 
-#include "devinst.h"
-
-namespace pv {
-namespace device {
-
-class Device : public DevInst
+class Application : public QApplication
 {
 public:
-	Device(sr_dev_inst *dev_inst);
-
-	sr_dev_inst* dev_inst() const;
-
-	void use(SigSession *owner) throw(QString);
-
-	void release();
-
-	std::string format_device_title() const;
-
-	std::map<std::string, std::string> get_device_info() const;
-
+	Application(int &argc, char* argv[]);
 private:
-	sr_dev_inst *const _sdi;
+	bool notify(QObject *receiver, QEvent *event);
 };
 
-} // device
-} // pv
-
-#endif // PULSVIEW_PV_DEVICE_DEVICE_H
+#endif // PULSEVIEW_PV_APPLICATION_H

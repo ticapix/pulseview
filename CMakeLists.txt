@@ -92,6 +92,10 @@ endif()
 
 find_package(Boost 1.42 COMPONENTS filesystem system REQUIRED)
 
+# Find the platform's thread library (needed for C++11 threads).
+# This will set ${CMAKE_THREAD_LIBS_INIT} to the correct, OS-specific value.
+find_package(Threads REQUIRED)
+
 #===============================================================================
 #= System Introspection
 #-------------------------------------------------------------------------------
@@ -124,6 +128,7 @@ configure_file (
 
 set(pulseview_SOURCES
 	main.cpp
+	pv/application.cpp
 	pv/devicemanager.cpp
 	pv/mainwindow.cpp
 	pv/sigsession.cpp
@@ -317,6 +322,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 set(PULSEVIEW_LINK_LIBS
 	${Boost_LIBRARIES}
 	${QT_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
 )
 
 if(STATIC_PKGDEPS_LIBS)

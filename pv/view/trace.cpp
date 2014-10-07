@@ -25,6 +25,7 @@
 
 #include <QApplication>
 #include <QFormLayout>
+#include <QKeyEvent>
 #include <QLineEdit>
 
 #include "trace.h"
@@ -263,18 +264,11 @@ void Trace::populate_popup_form(QWidget *parent, QFormLayout *form)
 {
 	QLineEdit *const name_edit = new QLineEdit(parent);
 	name_edit->setText(_name);
-	name_edit->selectAll();
-	name_edit->setFocus();
 	connect(name_edit, SIGNAL(textChanged(const QString&)),
 		this, SLOT(on_text_changed(const QString&)));
 	form->addRow(tr("Name"), name_edit);
 
 	add_colour_option(parent, form);
-}
-
-void Trace::close_popup()
-{
-	_popup->close();
 }
 
 void Trace::on_popup_closed()

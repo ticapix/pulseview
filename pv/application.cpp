@@ -1,7 +1,7 @@
 /*
  * This file is part of the PulseView project.
  *
- * Copyright (C) 2014 Joel Holdsworth <joel@airwebreathe.org.uk>
+ * Copyright (C) 2014 Martin Ling <martin-sigrok@earth.li>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,37 +18,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef PULSEVIEW_PV_DEVICE_DEVICE_H
-#define PULSEVIEW_PV_DEVICE_DEVICE_H
+#include "application.h"
+#include "config.h"
 
-#include <map>
-#include <string>
+#include <iostream>
 
-#include "devinst.h"
-
-namespace pv {
-namespace device {
-
-class Device : public DevInst
+Application::Application(int &argc, char* argv[]) :
+	QApplication(argc, argv)
 {
-public:
-	Device(sr_dev_inst *dev_inst);
+	setApplicationVersion(PV_VERSION_STRING);
+	setApplicationName("PulseView");
+	setOrganizationName("sigrok");
+	setOrganizationDomain("sigrok.org");
+}
 
-	sr_dev_inst* dev_inst() const;
-
-	void use(SigSession *owner) throw(QString);
-
-	void release();
-
-	std::string format_device_title() const;
-
-	std::map<std::string, std::string> get_device_info() const;
-
-private:
-	sr_dev_inst *const _sdi;
-};
-
-} // device
-} // pv
-
-#endif // PULSVIEW_PV_DEVICE_DEVICE_H
+bool Application::notify(QObject *receiver, QEvent *event)
+{
+	try {
+		return QApplication::notify(receiver, event);
+	} catch (std::exception& e) {
+		std::cerr << "Caught exception: " << e.what() << std::endl;
+		exit(1);
+		return false;
+	}
+}
