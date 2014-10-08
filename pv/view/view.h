@@ -27,8 +27,6 @@
 #include <set>
 #include <vector>
 
-//#include <boost/optional.hpp>
-
 #include <QAbstractScrollArea>
 #include <QSizeF>
 
@@ -36,8 +34,6 @@
 
 #include "cursorpair.h"
 
-
-//using boost::optional;
 
 namespace pv {
 
@@ -168,9 +164,6 @@ private:
 	static bool compare_trace_v_offsets(
 		const std::shared_ptr<pv::view::Trace> &a,
 		const std::shared_ptr<pv::view::Trace> &b);
-
-//	enum direction {LEFT, RIGHT};
-//	boost::optional<float> find_edge_selection(QPoint pos, enum direction way);
 
 private:
 	bool eventFilter(QObject *object, QEvent *event);
