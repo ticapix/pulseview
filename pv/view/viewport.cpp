@@ -146,8 +146,6 @@ void Viewport::mousePressEvent(QMouseEvent *event)
 		_mouse_down_valid = true;
 	}
 	if (event->buttons() & Qt::RightButton) {
-		_mouse_down_point = event->pos();
-		_mouse_down_offset = _view.offset();
 		_on_selection = true;
 		_selected_area.from = event->pos();
 	}
@@ -159,18 +157,12 @@ void Viewport::mouseReleaseEvent(QMouseEvent *event)
 
 	if (event->button() == Qt::LeftButton)
 		_mouse_down_valid = false;
-	if (event->buttons() & Qt::RightButton) {
-		_on_selection = true;
-		_selected_area.from = event->pos();
-	}
 
 	_mouse_down_point = event->pos();
 	_mouse_down_offset = _view.offset();
 	if (_on_selection) {
 		_on_selection = false;
 		_selected_area.to = event->pos();
-		// normalize that 'from' is on the left side of the selection
-		// and 'to' on the right side
 		if (_selected_area.from.x() > _selected_area.to.x())
 			std::swap(_selected_area.from, _selected_area.to);
 		traces_selected();
@@ -192,10 +184,6 @@ void Viewport::mouseMoveEvent(QMouseEvent *event)
 			_mouse_down_offset +
 			(_mouse_down_point - event->pos()).x() *
 			_view.scale());
-	}
-	if (_on_selection) {
-		_selected_area.to = event->pos();
-		update();
 	}
 	if (_on_selection) {
 		_selected_area.to = event->pos();
