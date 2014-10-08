@@ -555,94 +555,10 @@ void View::on_geometry_updated()
 	update_layout();
 }
 
-boost::optional<float> View::find_edge_selection(QPoint pos, enum direction way)
-{
-	const vector< shared_ptr<Trace> > traces(get_traces());
-
-	int prev_y = 0;
-	for(const shared_ptr<Trace> t: traces) {
-		assert(t);
-		shared_ptr<view::LogicSignal> sig = dynamic_pointer_cast<view::LogicSignal>(t);
-		if (sig == 0)
-			continue;
-		if (!sig->channel()->enabled)
-			continue;
-		if (!(prev_y <= pos.y() && pos.y() < sig->get_y())) {
-			prev_y = sig->get_y();
-			continue;
-		}
-		prev_y = sig->get_y();
-
-		const deque< shared_ptr<pv::data::LogicSnapshot> > &snapshots =	sig->logic_data()->get_snapshots();
-		if (snapshots.empty())
-			continue;
-
-		const shared_ptr<pv::data::LogicSnapshot> &snapshot = snapshots.front();
-
-		double samplerate = sig->logic_data()->samplerate();
-
-		// Show sample rate as 1Hz when it is unknown
-		if (samplerate == 0.0)
-			samplerate = 1.0;
-
-		int left = 0;
-		int right = _viewport->width();
-
-		assert(right >= left);
-
-		const double pixels_offset = offset() / scale(); // pixel = second / (second/pixel)
-		const double start_time = sig->logic_data()->get_start_time(); // second
-		const int64_t last_sample = snapshot->get_sample_count() - 1; // sample
-		const double samples_per_pixel = samplerate * scale(); // sample/pixel = sample/second * second/pixel
-		const double start = samplerate * (offset() - start_time); // sample = sample/second * second
-		const double end = start + samples_per_pixel * (right - left); // sample
-
-		vector<pv::data::LogicSnapshot::EdgePair> edges;
-		int index = sig->channel()->index;
-		const float Oversampling = 2.0f;
-
-		snapshot->get_subsampled_edges(edges,
-			min(max((int64_t)floor(start), (int64_t)0), last_sample),
-			min(max((int64_t)ceil(end), (int64_t)0), last_sample),
-			samples_per_pixel / Oversampling, index);
-
-		if (edges.size() < 2)
-			continue;
-
-		if (way == direction::RIGHT) {
-			for (vector<pv::data::LogicSnapshot::EdgePair>::const_iterator i =
-					edges.begin(); i != edges.end(); ++i) {
-				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
-				if (x < pos.x())
-					continue;
-				return boost::optional<float>(x);
-			}
-		} else {
-			for (vector<pv::data::LogicSnapshot::EdgePair>::const_reverse_iterator i =
-					edges.rbegin(); i != edges.rend(); ++i) {
-				float x = ((*i).first / samples_per_pixel - pixels_offset) + left;
-				if (x > pos.x())
-					continue;
-				return boost::optional<float>(x);
-			}
-		}
-	}
-	return boost::optional<float>(boost::none);
-}
-
 void View::traces_selected()
 {
-	boost::optional<float> edge; // in pixel
-	if ((edge = find_edge_selection(_viewport->get_selection_from(), direction::LEFT))) {
-		_cursors.first()->set_time(*edge * scale() + offset());
-	} else {
-		_cursors.first()->set_time(offset());
-	}
-	if ((edge = find_edge_selection(_viewport->get_selection_to(), direction::RIGHT))) {
-		_cursors.second()->set_time(*edge * scale() + offset());
-	} else {
-		_cursors.second()->set_time(_viewport->width() * scale() + offset());
-	}
+	_cursors.first()->set_time(_viewport->get_selection_from().x() * scale() + offset());
+	_cursors.second()->set_time(_viewport->get_selection_to().x() * scale() + offset());
 	_viewport->update();
 }
 
