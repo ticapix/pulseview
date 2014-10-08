@@ -41,9 +41,9 @@
 #include "pv/sigsession.h"
 #include "pv/data/logic.h"
 #include "pv/data/logicsnapshot.h"
-#include "pv/view/logicsignal.h"
+//#include "pv/view/logicsignal.h"
 
-using std::dynamic_pointer_cast;
+//using std::dynamic_pointer_cast;
 using pv::data::SignalData;
 using std::deque;
 using std::list;

@@ -74,7 +74,7 @@ private:
 	double _pinch_offset0;
 	double _pinch_offset1;
 	bool _pinch_zoom_active;
-	
+
 	bool _on_selection;
 	struct {
 		QPoint from;
