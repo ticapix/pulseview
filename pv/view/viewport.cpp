@@ -168,14 +168,11 @@ void Viewport::mouseReleaseEvent(QMouseEvent *event)
 	_mouse_down_offset = _view.offset();
 	if (_on_selection) {
 		_on_selection = false;
+		_selected_area.to = event->pos();
 		// normalize that 'from' is on the left side of the selection
 		// and 'to' on the right side
-		if (_selected_area.from.x() <= event->pos().x()) {
-			_selected_area.to = event->pos();
-		} else {
-			_selected_area.to = _selected_area.from;
-			_selected_area.from = event->pos();
-		}
+		if (_selected_area.from.x() > _selected_area.to.x())
+			std::swap(_selected_area.from, _selected_area.to);
 		traces_selected();
 	}
 }

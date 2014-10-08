@@ -34,7 +34,6 @@
 
 #include "cursorpair.h"
 
-
 namespace pv {
 
 class SigSession;
