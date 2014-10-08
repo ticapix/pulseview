@@ -107,6 +107,9 @@ View::View(SigSession &session, QWidget *parent) :
 	connect(_header, SIGNAL(signals_moved()),
 		this, SLOT(on_signals_moved()));
 
+	connect(_viewport, SIGNAL(traces_selected()),
+			this, SLOT(traces_selected()));
+
 	connect(_header, SIGNAL(selection_changed()),
 		_cursorheader, SLOT(clear_selection()));
 	connect(_cursorheader, SIGNAL(selection_changed()),
@@ -548,6 +551,15 @@ void View::on_signals_moved()
 void View::on_geometry_updated()
 {
 	update_layout();
+}
+
+void View::traces_selected()
+{
+	_cursors.first()->set_time(_viewport->get_selection_from().x() * scale()
+			+ offset());
+	_cursors.second()->set_time(_viewport->get_selection_to().x() * scale()
+			+ offset());
+	_viewport->update();
 }
 
 } // namespace view

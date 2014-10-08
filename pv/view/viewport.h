@@ -42,6 +42,8 @@ public:
 	explicit Viewport(View &parent);
 
 	int get_total_height() const;
+	QPoint get_selection_from() const;
+	QPoint get_selection_to() const;
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -59,6 +61,9 @@ private Q_SLOTS:
 	void on_signals_changed();
 	void on_signals_moved();
 
+Q_SIGNALS:
+	void traces_selected();
+
 private:
 	View &_view;
 
@@ -69,6 +74,13 @@ private:
 	double _pinch_offset0;
 	double _pinch_offset1;
 	bool _pinch_zoom_active;
+
+	bool _on_selection;
+	struct {
+		QPoint from;
+		QPoint to;
+	} _selected_area;
+	QColor _selection_color;
 };
 
 } // namespace view

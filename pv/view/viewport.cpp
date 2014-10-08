@@ -27,6 +27,7 @@
 #include "../sigsession.h"
 
 #include <QMouseEvent>
+#include <QApplication>
 
 using std::abs;
 using std::max;
@@ -41,13 +42,16 @@ Viewport::Viewport(View &parent) :
 	QWidget(&parent),
 	_view(parent),
 	_mouse_down_valid(false),
-	_pinch_zoom_active(false)
+	_pinch_zoom_active(false),
+	_on_selection(false)
 {
 	setAttribute(Qt::WA_AcceptTouchEvents, true);
 
 	setMouseTracking(true);
 	setAutoFillBackground(true);
 	setBackgroundRole(QPalette::Base);
+	_selection_color = QApplication::palette().highlight().color();
+	_selection_color.setAlphaF(0.5);
 
 	connect(&_view.session(), SIGNAL(signals_changed()),
 		this, SLOT(on_signals_changed()));
@@ -58,6 +62,16 @@ Viewport::Viewport(View &parent) :
 	// Trigger the initial event manually. The default device has signals
 	// which were created before this object came into being
 	on_signals_changed();
+}
+
+QPoint Viewport::get_selection_from() const
+{
+	return _selected_area.from;
+}
+
+QPoint Viewport::get_selection_to() const
+{
+	return _selected_area.to;
 }
 
 int Viewport::get_total_height() const
@@ -98,6 +112,10 @@ void Viewport::paintEvent(QPaintEvent*)
 	if (_view.cursors_shown())
 		_view.cursors().draw_viewport_foreground(p, rect());
 
+	if (_on_selection) {
+		p.fillRect(QRect(_selected_area.from, _selected_area.to).normalized(),
+				_selection_color);
+	}
 	p.end();
 }
 
@@ -127,6 +145,10 @@ void Viewport::mousePressEvent(QMouseEvent *event)
 		_mouse_down_offset = _view.offset();
 		_mouse_down_valid = true;
 	}
+	if (event->buttons() & Qt::RightButton) {
+		_on_selection = true;
+		_selected_area.from = event->pos();
+	}
 }
 
 void Viewport::mouseReleaseEvent(QMouseEvent *event)
@@ -135,6 +157,16 @@ void Viewport::mouseReleaseEvent(QMouseEvent *event)
 
 	if (event->button() == Qt::LeftButton)
 		_mouse_down_valid = false;
+
+	_mouse_down_point = event->pos();
+	_mouse_down_offset = _view.offset();
+	if (_on_selection) {
+		_on_selection = false;
+		_selected_area.to = event->pos();
+		if (_selected_area.from.x() > _selected_area.to.x())
+			std::swap(_selected_area.from, _selected_area.to);
+		traces_selected();
+	}
 }
 
 void Viewport::mouseMoveEvent(QMouseEvent *event)
@@ -152,6 +184,10 @@ void Viewport::mouseMoveEvent(QMouseEvent *event)
 			_mouse_down_offset +
 			(_mouse_down_point - event->pos()).x() *
 			_view.scale());
+	}
+	if (_on_selection) {
+		_selected_area.to = event->pos();
+		update();
 	}
 }
 

@@ -185,6 +185,7 @@ private Q_SLOTS:
 
 	void on_geometry_updated();
 
+	void traces_selected();
 private:
 	SigSession &_session;
 
