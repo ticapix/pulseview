@@ -555,8 +555,10 @@ void View::on_geometry_updated()
 
 void View::traces_selected()
 {
-	_cursors.first()->set_time(_viewport->get_selection_from().x() * scale() + offset());
-	_cursors.second()->set_time(_viewport->get_selection_to().x() * scale() + offset());
+	_cursors.first()->set_time(_viewport->get_selection_from().x() * scale()
+			+ offset());
+	_cursors.second()->set_time(_viewport->get_selection_to().x() * scale()
+			+ offset());
 	_viewport->update();
 }
 
